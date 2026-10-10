@@ -1,0 +1,26 @@
+corpus,codec,family,molecules,successes,accuracy,wilson_low,wilson_high,injectivity_ceiling,median_bits,p99_bits,max_bits,mean_bits,fraction_within_budget,native_bits,budget,seconds,lossless_by_design,failures,error,notes
+protacs,smiles,string,10249,10249,1.00000000,0.99962533,1.00000000,,612,1128,3492,588.64,0.981462,,1000,22.69,True,,,RDKit canonical isomeric SMILES; the benchmark's reference form
+protacs,smiles-kekule,string,10249,10249,1.00000000,0.99962533,1.00000000,,684,1242,3612,658.15,0.971607,,1000,39.61,True,,,Kekulised SMILES; isolates the token cost of aromatic notation
+protacs,selfies,string,10249,10249,1.00000000,0.99962533,1.00000000,,714,1323,3738,683.64,0.953069,,1000,54.27,True,,,"SELFIES v2; every string is a valid molecule, at a cost in tokens"
+protacs,deepsmiles,string,10249,10249,1.00000000,0.99962533,1.00000000,,847,1561,4305,807.04,0.767490,,1000,17.60,True,,,DeepSMILES (rings+branches); removes the two brittle SMILES syntaxes
+protacs,inchi,string,10249,1192,0.11630403,0.11024065,0.12265493,,960,1914,2526,994.28,0.553691,,1000,135.05,False,formula-kept=9051;stereo-only=6,,"canonical identifier; normalises mobile H and some stereo, so it loses molecules"
+protacs,smiles+flat,entropy,10249,10249,1.00000000,0.99962533,1.00000000,1.00000000,721,1323,4081,693.95,0.950922,,1000,51.55,True,,,"fixed-width token code; no modelling, the honest zero-effort baseline"
+protacs,smiles+huffman,entropy,10249,10249,1.00000000,0.99962533,1.00000000,1.00000000,405,770,2198,398.12,0.996292,,1000,60.50,True,,,optimal per-symbol code; the gain over flat is symbol skew alone
+protacs,smiles+arith-o0,entropy,10249,10249,1.00000000,0.99962533,1.00000000,1.00000000,392,753,2178,383.16,0.996390,,1000,68.74,True,,,"exact arithmetic coding, order 0; fractional bits per symbol"
+protacs,smiles+arith-o1,entropy,10249,10249,1.00000000,0.99962533,1.00000000,1.00000000,323,639,1767,319.68,0.997561,,1000,65.54,True,,,exact arithmetic coding conditioned on the previous 1 tokens
+protacs,smiles+arith-o2,entropy,10249,10249,1.00000000,0.99962533,1.00000000,1.00000000,281,566,1565,278.83,0.997756,,1000,57.73,True,,,exact arithmetic coding conditioned on the previous 2 tokens
+protacs,smiles+arith-o3,entropy,10249,10249,1.00000000,0.99962533,1.00000000,1.00000000,252,523,1465,250.79,0.997853,,1000,65.33,True,,,exact arithmetic coding conditioned on the previous 3 tokens
+protacs,smiles+arith-o4,entropy,10249,10249,1.00000000,0.99962533,1.00000000,1.00000000,228,495,1408,229.56,0.997853,,1000,65.65,True,,,exact arithmetic coding conditioned on the previous 4 tokens
+protacs,selfies+flat,entropy,10249,10249,1.00000000,0.99962533,1.00000000,1.00000000,824,1520,4280,790.02,0.828178,,1000,21.50,True,,,"fixed-width token code; no modelling, the honest zero-effort baseline"
+protacs,selfies+huffman,entropy,10249,10249,1.00000000,0.99962533,1.00000000,1.00000000,383,724,2470,375.00,0.996292,,1000,26.84,True,,,optimal per-symbol code; the gain over flat is symbol skew alone
+protacs,selfies+arith-o0,entropy,10249,10249,1.00000000,0.99962533,1.00000000,1.00000000,360,692,2199,352.11,0.996585,,1000,32.53,True,,,"exact arithmetic coding, order 0; fractional bits per symbol"
+protacs,selfies+arith-o1,entropy,10249,10249,1.00000000,0.99962533,1.00000000,1.00000000,333,637,2098,324.32,0.996878,,1000,34.14,True,,,exact arithmetic coding conditioned on the previous 1 tokens
+protacs,selfies+arith-o2,entropy,10249,10249,1.00000000,0.99962533,1.00000000,1.00000000,298,570,1909,290.30,0.997463,,1000,32.93,True,,,exact arithmetic coding conditioned on the previous 2 tokens
+protacs,selfies+arith-o3,entropy,10249,10249,1.00000000,0.99962533,1.00000000,1.00000000,274,549,1809,271.96,0.997658,,1000,36.47,True,,,exact arithmetic coding conditioned on the previous 3 tokens
+protacs,selfies+arith-o4,entropy,10249,10249,1.00000000,0.99962533,1.00000000,1.00000000,252,528,1782,254.87,0.997756,,1000,40.16,True,,,exact arithmetic coding conditioned on the previous 4 tokens
+protacs,smiles+zlib,entropy,10249,10249,1.00000000,0.99962533,1.00000000,1.00000000,640,984,1352,629.11,0.991414,,1000,28.78,True,,,general-purpose compressor; container headers dominate at this message length
+protacs,smiles+bz2,entropy,10249,10249,1.00000000,0.99962533,1.00000000,1.00000000,832,1160,1576,821.07,0.906820,,1000,31.16,True,,,general-purpose compressor; container headers dominate at this message length
+protacs,smiles+lzma,entropy,10249,10249,1.00000000,0.99962533,1.00000000,1.00000000,1120,1536,1888,1118.23,0.270465,,1000,179.32,True,,,general-purpose compressor; container headers dominate at this message length
+protacs,graph-bits,structural,10249,10249,1.00000000,0.99962533,1.00000000,1.00000000,1517,2828,9270,1460.34,0.224998,,1000,55.88,True,,,hand-rolled canonical graph serialisation; lossless including stereochemistry
+protacs,rdkit-binary,structural,10249,10249,1.00000000,0.99962533,1.00000000,1.00000000,6536,11136,47968,6282.08,0.000390,,1000,9.82,True,,,"RDKit's native serialisation; lossless but built for fidelity, not compactness"
+protacs,rdkit-binary-lzma,structural,10249,10249,1.00000000,0.99962533,1.00000000,1.00000000,3392,5056,10784,3266.10,0.000098,,1000,159.64,True,,,"RDKit's native serialisation; lossless but built for fidelity, not compactness"

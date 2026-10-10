@@ -1,0 +1,7 @@
+corpus,codec,family,molecules,successes,accuracy,wilson_low,wilson_high,injectivity_ceiling,median_bits,p99_bits,max_bits,mean_bits,fraction_within_budget,native_bits,budget,seconds,lossless_by_design,failures,error,notes
+multitask-train,smiles,string,200000,200000,1.00000000,0.99998079,1.00000000,,276,468,888,266.90,1.000000,,1000,130.32,True,,,RDKit canonical isomeric SMILES; the benchmark's reference form
+multitask-train,selfies,string,200000,199998,0.99999000,0.99996354,0.99999726,0.00000000,294,518,1008,289.80,0.999995,,1000,296.99,True,no-encoding=2,,"SELFIES v2; every string is a valid molecule, at a cost in tokens"
+multitask-train,smiles+huffman,entropy,200000,200000,1.00000000,0.99998079,1.00000000,1.00000000,174,298,764,172.10,1.000000,,1000,166.67,True,,,optimal per-symbol code; the gain over flat is symbol skew alone
+multitask-train,smiles+arith-o3,entropy,200000,200000,1.00000000,0.99998079,1.00000000,1.00000000,80,177,568,85.09,1.000000,,1000,209.76,True,,,exact arithmetic coding conditioned on the previous 3 tokens
+multitask-train,selfies+arith-o3,entropy,200000,199998,0.99999000,0.99996354,0.99999726,0.99999000,83,185,388,88.76,1.000000,,1000,319.45,True,no-encoding=2,,exact arithmetic coding conditioned on the previous 3 tokens
+multitask-train,graph-bits,structural,200000,200000,1.00000000,0.99998079,1.00000000,1.00000000,619,1057,2336,602.45,0.977115,,1000,374.26,True,,,hand-rolled canonical graph serialisation; lossless including stereochemistry

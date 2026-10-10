@@ -1,0 +1,4 @@
+corpus,codec,family,molecules,successes,accuracy,wilson_low,wilson_high,injectivity_ceiling,median_bits,p99_bits,max_bits,mean_bits,fraction_within_budget,native_bits,budget,seconds,lossless_by_design,failures,error,notes
+multitask-train,smiles+arith-o2,entropy,200000,200000,1.00000000,0.99998079,1.00000000,1.00000000,95,199,574,100.34,1.000000,,1000,212.08,True,,,exact arithmetic coding conditioned on the previous 2 tokens
+multitask-train,smiles+arith-o4,entropy,200000,200000,1.00000000,0.99998079,1.00000000,1.00000000,70,155,574,75.37,1.000000,,1000,166.19,True,,,exact arithmetic coding conditioned on the previous 4 tokens
+multitask-train,selfies-hypervalent+arith-o4,entropy,200000,200000,1.00000000,0.99998079,1.00000000,1.00000000,73,166,348,78.76,1.000000,,1000,203.32,True,,,exact arithmetic coding conditioned on the previous 4 tokens

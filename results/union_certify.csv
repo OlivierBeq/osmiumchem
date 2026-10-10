@@ -1,0 +1,4 @@
+corpus,codec,family,molecules,successes,accuracy,wilson_low,wilson_high,injectivity_ceiling,median_bits,p99_bits,max_bits,mean_bits,fraction_within_budget,native_bits,budget,seconds,lossless_by_design,failures,error,notes
+union,smiles+arith-o2,entropy,200000,199944,0.99972000,0.99963645,0.99978435,1.00000000,101,222,4392,106.84,0.999720,,1000,109.06,True,over-budget=56,,exact arithmetic coding conditioned on the previous 2 tokens
+union,smiles+arith-o4,entropy,200000,199996,0.99998000,0.99994857,0.99999222,1.00000000,74,172,3457,80.36,0.999980,,1000,117.39,True,over-budget=4,,exact arithmetic coding conditioned on the previous 4 tokens
+union,selfies-hypervalent+arith-o4,entropy,200000,199995,0.99997500,0.99994147,0.99998932,1.00000000,79,188,3520,84.96,0.999975,,1000,187.52,True,over-budget=5,,exact arithmetic coding conditioned on the previous 4 tokens

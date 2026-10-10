@@ -1,0 +1,148 @@
+[build-system]
+requires = ["setuptools>=77.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "osmiumchem"
+dynamic = ["version"]
+description = "Round-trip benchmark of molecular encodings under a hard bit budget"
+requires-python = ">=3.11"
+readme = { file = "README.md", content-type = "text/markdown" }
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+    { name = "Olivier J. M. Béquignon", email = "olivier.bequignon.maintainer@gmail.com" },
+]
+maintainers = [
+    { name = "Olivier J. M. Béquignon", email = "olivier.bequignon.maintainer@gmail.com" },
+]
+classifiers = [
+    "Development Status :: 1 - Planning",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+keywords = [
+    "cheminformatics",
+    "SMILES",
+    "SELFIES",
+    "molecular-representation",
+    "fingerprints",
+    "arithmetic-coding",
+    "latent-space",
+]
+dependencies = [
+    "numpy>=1.26",
+    "rdkit>=2023.9",
+    "selfies>=2.1",
+]
+
+[project.urls]
+Homepage = "https://github.com/OlivierBeq/osmiumchem"
+
+[project.optional-dependencies]
+testing = [
+    "pytest",
+]
+# Reading Parquet corpora, which only the scripts in this repository do.
+parquet = [
+    "pyarrow>=15",
+]
+# Alternative string representations compared in the benchmark.
+representations = [
+    "deepsmiles>=1.0",
+]
+# Pretrained neural encoders. CPU-only JAX is enough; jax-grover needs torch
+# solely to convert the upstream checkpoint on first use.
+neural = [
+    "jax>=0.10",
+    "flax>=0.12",
+    "optax>=0.2",
+    "jax-cddd>=0.1",
+    "jax-grover>=0.2",
+]
+all = [
+    "osmiumchem[parquet,representations,neural,testing]",
+]
+
+[project.scripts]
+osmiumchem = "osmiumchem.__main__:main"
+
+[tool.coverage.run]
+source = ["src/osmiumchem"]
+omit = [
+    "*/__main__.py",
+    # The pretrained CDDD and GROVER encoders download several hundred
+    # megabytes of weights on first use, so they cannot run in CI. They are
+    # exercised by the `neural` suite in scripts/run_all.sh, whose results are
+    # recorded in docs/RESULTS.md; the quantisation and bit-accounting logic
+    # they rely on lives in codecs/vectors.py and *is* covered.
+    "*/codecs/latents.py",
+]
+
+[tool.coverage.report]
+fail_under = 95
+exclude_also = [
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    # Defensive guards against states that the type system or an earlier
+    # validation already rules out.
+    "raise NotImplementedError",
+    "except ImportError:",
+]
+
+[tool.setuptools.dynamic]
+version = { attr = "osmiumchem.__version__" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+# The fitted codebooks. Without them an installed package can encode nothing,
+# since an entropy codec is its frequency table.
+[tool.setuptools.package-data]
+osmiumchem = ["codebooks/*.oc.xz"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors (flake8)
+    "W",    # pycodestyle warnings (flake8)
+    "F",    # pyflakes (flake8)
+    "I",    # import sorting (isort, flake8-isort)
+    "N",    # naming conventions (pep8-naming)
+    "D",    # docstring conventions (pydocstyle, flake8-docstrings)
+    "UP",   # pyupgrade
+    "B",    # bugbear (flake8-bugbear)
+    "A",    # shadowed builtins (flake8-builtins)
+    "COM",  # trailing commas (flake8-commas)
+    "C4",   # comprehensions (flake8-comprehensions)
+    "T20",  # print statements (flake8-print)
+    "S",    # security (flake8-bandit)
+]
+ignore = [
+    "UP009", # UTF-8 coding declaration: kept deliberately in every file, do not strip
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+    "S101",  # assert usage is expected in tests
+    "D",     # tests are not held to docstring conventions
+    "S311",  # seeded RNGs drive fuzzing here, nothing cryptographic
+]
+"src/osmiumchem/__main__.py" = [
+    "T201",  # the CLI's whole job is to print its results
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["osmiumchem", "tests"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
+
+[tool.mypy]
+python_version = "3.11"
+exclude = ["build", "dist"]
