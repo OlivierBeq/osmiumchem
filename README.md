@@ -31,7 +31,7 @@ fourteenth of the budget.
 - [Quick start](#-quick-start) — one molecule, then the full benchmark
 - [How fidelity is judged](#-how-fidelity-is-judged)
 - [What the benchmark shows](#-what-the-benchmark-shows) — the findings
-- [Codecs](#-codecs) · [Datasets](#-datasets) · [Documentation](#-documentation)
+- [Codecs](#-codecs) · [Corpora](#-corpora) · [Documentation](#-documentation)
 
 ## 📦 Installation
 
@@ -49,30 +49,76 @@ benchmark corpus, so encoding works immediately with no corpus on disk.
 
 ## 🚀 Quick start
 
-### One molecule, by codec name
+### Encode a molecule to bits, and decode the bits back
+
+```python
+import osmiumchem as oc
+
+# The default codec, already fitted and shipped with the package:
+# nothing to download, no corpus on disk.
+codec = oc.load_codec("smiles+arith-o4")
+
+payload = codec.encode("CN1C=NC2=C1C(=O)N(C)C(=O)N2C")   # caffeine
+payload.bits    # 57
+payload.text    # '101000100101011100101101110110111110001000100100101000000'
+
+codec.decode(payload.text).smiles
+# 'Cn1c(=O)c2c(ncn2C)n(C)c1=O'
+```
+
+Caffeine in **57 bits**, a seventeenth of the budget, and back again exactly.
+
+An order-4 arithmetic coder *is* its frequency table, so that table is what
+ships: one per codec per benchmark corpus. `corpus="protacs"` picks a different
+one and `oc.list_codebooks()` names them all.
+
+The payload is a plain string that stores and travels anywhere. `hex` is the
+compact form, and both forms carry the bit length, because a payload is rarely
+a whole number of bytes and its leading zeros are data:
+
+```python
+codec.encode("CN1C=NC2=C1C(=O)N(C)C(=O)N2C", payload_format="hex").text
+# '57:144ae5bb7c44940'
+```
+
+Those same 57 bits decode into whichever representation you ask for:
+
+| `output_format` | `codec.decode(payload.text, output_format=...).rendered` |
+| --- | --- |
+| `smiles` (default) | `Cn1c(=O)c2c(ncn2C)n(C)c1=O` |
+| `smiles-kekule` | `CN1C=NC2=C1C(=O)N(C)C(=O)N2C` |
+| `inchi` | `InChI=1S/C8H10N4O2/c1-10-4-9-6-5(10)7(13)12(3)8(14)11(6)2/h4H,1-3H3` |
+| `inchikey` | `RYYVLZVUVIJVGH-UHFFFAOYSA-N` |
+| `selfies` | `[C][N][C][=Branch1][C][=O][C][=C]...` |
+| `deepsmiles` | `Cnc=O)ccncn5C))))nC)c6=O` |
+
+Input is just as free: SMILES, SELFIES, InChI and DeepSMILES are all accepted
+and detected automatically. Note that the recovered SMILES is the *canonical*
+form rather than the string that went in — both spell caffeine, and
+[docs/USAGE.md](docs/USAGE.md) explains why that counts as success.
+
+### The same from the command line
 
 ```bash
 # list the names the commands below accept
 osmiumchem codecs
 
-# encode, decode, and check the molecule survived
-osmiumchem roundtrip --codec smiles+arith-o4 "CN1C=NC2=C1C(=O)N(C)C(=O)N2C"
-#  OK    57 bits  Cn1c(=O)c2c(ncn2C)n(C)c1=O
-
-# or the two halves separately; both read the same shipped codebook
 osmiumchem encode --codec smiles+arith-o4 "CN1C=NC2=C1C(=O)N(C)C(=O)N2C"
+# 101000100101011100101101110110111110001000100100101000000    57 bits
+
 osmiumchem decode --codec smiles+arith-o4 101000100101011100101101110110111110001000100100101000000
+# Cn1c(=O)c2c(ncn2C)n(C)c1=O    57 bits
+
+# or both halves at once, checking the molecule survived
+osmiumchem roundtrip --codec smiles+arith-o4 "CN1C=NC2=C1C(=O)N(C)C(=O)N2C"
+# OK    57 bits  Cn1c(=O)c2c(ncn2C)n(C)c1=O
 ```
 
-Caffeine, recovered exactly, in 57 bits. Nothing was downloaded and nothing was
-fitted: an order-4 arithmetic coder *is* its frequency table, and a table
-fitted on each benchmark corpus ships inside the package. `--corpus` picks
-which one, and `osmiumchem codecs --corpora` lists them.
+`encode` and `decode` read the same shipped codebook, which is what lets them
+be two separate processes. `--in` and `--out` select the representations,
+`--corpus` the codebook, and `-` reads molecules from stdin.
 
-Input may be SMILES, SELFIES, InChI or DeepSMILES (`--in`, default `auto`), the
-molecule comes back in any of those (`--out`), and `-` reads from stdin.
-
-The verdict has three values, because losing a molecule and keeping it in too
+`roundtrip` has three verdicts, because losing a molecule and keeping it in too
 many bits are different results:
 
 | verdict | meaning |
@@ -81,33 +127,20 @@ many bits are different results:
 | `OVER` | same molecule, above the bit budget |
 | `FAIL` | molecule lost |
 
-### From Python
+### Fitting on your own chemistry
 
-Three verbs, reading the same codebooks as the commands:
+The fitted table *is* the code, so matching it to your series costs fewer bits:
 
 ```python
-import osmiumchem as oc
-
-codec = oc.load_codec("smiles+arith-o4")
-result = codec.round_trip("CN1C=NC2=C1C(=O)N(C)C(=O)N2C")
-result.verdict, result.bits, result.decoded.smiles
-# ('ok', 57, 'Cn1c(=O)c2c(ncn2C)n(C)c1=O')
-
-# fit on your own series, keep it, and read it back anywhere
 mine = oc.fit_codec("smiles+arith-o4", my_series)
 oc.save_codec(mine, "series.oc.xz")
-mine = oc.load_codec("series.oc.xz")
-results = mine.round_trip_many(held_out)        # batched, one result each
+mine = oc.load_codec("series.oc.xz")           # anywhere, any process
+results = mine.round_trip_many(held_out)       # batched, one result each
 ```
 
-Fitting on the chemistry you intend to encode pays off, because the fitted
-table *is* the code. On 100 held-out PROTACs, a codec fitted on 2500 other
-PROTACs spends a median of **146 bits** against **208** for the shipped `union`
-codebook, with both recovering every molecule.
-
-[docs/USAGE.md](docs/USAGE.md) covers both interfaces, including why a
-successful round trip returns the *canonical* SMILES rather than the string you
-typed.
+On 100 held-out PROTACs, a codec fitted on 2500 other PROTACs spends a median
+of **146 bits** against **208** for the shipped `union` codebook, with both
+recovering every molecule.
 
 ### The benchmark
 
